@@ -198,6 +198,15 @@ fn print_backtrace(backtrace: &mut Backtrace) {
     eprintln!("\n\nAn error occurred in miri:\n{:?}", backtrace);
 }
 
+impl From<ErrorHandled> for InterpErrorInfo<'tcx> {
+    fn from(err: ErrorHandled) -> Self {
+        match err {
+            ErrorHandled::Reported => InterpError::ReferencedConstant,
+            ErrorHandled::TooGeneric => InterpError::TooGeneric,
+        }.into()
+    }
+}
+
 impl<'tcx> From<InterpError<'tcx, u64>> for InterpErrorInfo<'tcx> {
     fn from(kind: InterpError<'tcx, u64>) -> Self {
         let backtrace = match env::var("RUST_CTFE_BACKTRACE") {
